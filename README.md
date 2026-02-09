@@ -4,7 +4,7 @@
 🔍 Check the SQL queries here: [Project_jobs](/Project_jobs/)
 
 # Background
-The divine purpose of this project is to help job seekers find their desired job, whether it is remote, most-paying, or have more benefits.
+The divine purpose of this project is to help job seekers find their desired job, whether it is remote, most paying, or has more benefits.
 
 The data belongs to [Luke Barousse](https://lukebarousse.com/sql)
 
@@ -26,7 +26,7 @@ For my analysis, I used the following tools:
 # The Analysis
 Each query for this project aimed at investigating specific aspects of the data analyst job market. Here’s how I approached each question:
 
-### 1. Top 10 Most Paying Data Analyst Jobs
+### 1.  Find the Top 10 Most Paying Data Analyst Jobs
 
 To identify the highest-paying roles, I filtered the data by data analyst roles and remote jobs. I also filtered out positions that did not mention salary. Then, I ordered the query by salary and put a limit to get only the top 10 values.
 ```sql
@@ -54,9 +54,39 @@ And here is the breakdown of the said query:
 ![Top paying jobs](assets/image.png)
 *This is the bar graph of the mentioned SQL query for the top-paying jobs. I generated this using MS Excel*
 
+### 2. What skills are required for the top-paying, remote data analyst jobs?
+
+To show the skills that are wanted by the employers who provide remote work and offer the highest salary, I first created a CTE for the top-paying jobs (previous query), and then joined it with the skills table.
+```sql
+WITH top_paying_jobs AS (
+  SELECT job_id,
+    job_title,
+    salary_year_avg,
+    name as company_name
+  FROM job_postings_fact
+    LEFT JOIN company_dim ON company_dim.company_id = job_postings_fact.company_id
+  WHERE job_title_short = 'Data Analyst'
+    AND job_work_from_home = TRUE
+    AND salary_year_avg IS NOT NULL
+  ORDER BY salary_year_avg DESC
+  LIMIT 10
+)
+SELECT top_paying_jobs.*,
+  skills
+FROM top_paying_jobs
+  INNER JOIN skills_job_dim ON top_paying_jobs.job_id = skills_job_dim.job_id
+  INNER JOIN skills_dim ON skills_dim.skill_id = skills_job_dim.skill_id
+ORDER BY salary_year_avg DESC
+```
+Here are the findings:
+Top-paying jobs require SQL more than any other tool, followed by Python and Tableau. This indicates that having a strong foundation in these three tools can increase your chances of landing a job. 
+
+![Top paying jobs](assets/image-2.png)
+*The column chart shows the skills that will get you a top-paying job
+
 # What I Learned
 
-Throughout this project, I have improved my SQL skills and learned more databases. More importantly, I learned how to manipulate the data:
+Throughout this project, I have improved my SQL skills and learned more about databases. More importantly, I learned how to manipulate the data:
 
 - With the power of WITH clauses, I can merge different tables!
 - Using GROUP BY, I can turn aggregate functions into summarized data!
